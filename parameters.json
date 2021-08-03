@@ -2,32 +2,59 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "servers_pyplanpg_name": {
-            "value": null
+        "resourceName": {
+            "value": "pyplan-aks"
         },
-        "privateEndpoints_private_name": {
-            "value": null
+        "location": {
+            "value": "westus2"
         },
-        "managedClusters_pyplan_aks_name": {
-            "value": null
+        "dnsPrefix": {
+            "value": "pyplan-aks-dns"
         },
-        "virtualNetworks_azure_pyplan_aks_vnet_name": {
-            "value": null
+        "kubernetesVersion": {
+            "value": "1.21.1"
         },
-        "privateDnsZones_privatelink_postgres_database_azure_com_name": {
-            "value": null
+        "networkPlugin": {
+            "value": "azure"
         },
-        "networkInterfaces_private_nic_17dea8c0_152c_444c_9ac6_e8f4100cfd8c_name": {
-            "value": null
+        "enableRBAC": {
+            "value": true
         },
-        "workspaces_DefaultWorkspace_066f9ea0_74db_4751_921d_94dec804dc98_WUS2_externalid": {
-            "value": null
+        "enablePrivateCluster": {
+            "value": false
         },
-        "publicIPAddresses_5bc2b666_6576_468d_9c67_b2ded21657dc_externalid": {
-            "value": null
+        "enableHttpApplicationRouting": {
+            "value": false
         },
-        "userAssignedIdentities_pyplan_aks_agentpool_externalid": {
-            "value": null
+        "enableAzurePolicy": {
+            "value": true
+        },
+        "vmssNodePool": {
+            "value": true
+        },
+        "vnetSubnetID": {
+            "value": "/subscriptions/066f9ea0-74db-4751-921d-94dec804dc98/resourceGroups/azure-pyplan-aks/providers/Microsoft.Network/virtualNetworks/azure-pyplan-aks-vnet/subnets/default"
+        },
+        "serviceCidr": {
+            "value": "10.0.0.0/16"
+        },
+        "dnsServiceIP": {
+            "value": "10.0.0.10"
+        },
+        "dockerBridgeCidr": {
+            "value": "172.17.0.1/16"
+        },
+        "workspaceName": {
+            "value": "DefaultWorkspace-066f9ea0-74db-4751-921d-94dec804dc98-WUS2"
+        },
+        "omsWorkspaceId": {
+            "value": "/subscriptions/066f9ea0-74db-4751-921d-94dec804dc98/resourceGroups/DefaultResourceGroup-WUS2/providers/Microsoft.OperationalInsights/workspaces/DefaultWorkspace-066f9ea0-74db-4751-921d-94dec804dc98-WUS2"
+        },
+        "workspaceRegion": {
+            "value": "westus2"
+        },
+        "networkPolicy": {
+            "value": "azure"
         }
     }
 }
