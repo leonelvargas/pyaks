@@ -1,0 +1,33 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "servers_pyplanpg_name": {
+            "value": null
+        },
+        "privateEndpoints_private_name": {
+            "value": null
+        },
+        "managedClusters_pyplan_aks_name": {
+            "value": null
+        },
+        "virtualNetworks_azure_pyplan_aks_vnet_name": {
+            "value": null
+        },
+        "privateDnsZones_privatelink_postgres_database_azure_com_name": {
+            "value": null
+        },
+        "networkInterfaces_private_nic_17dea8c0_152c_444c_9ac6_e8f4100cfd8c_name": {
+            "value": null
+        },
+        "workspaces_DefaultWorkspace_066f9ea0_74db_4751_921d_94dec804dc98_WUS2_externalid": {
+            "value": null
+        },
+        "publicIPAddresses_5bc2b666_6576_468d_9c67_b2ded21657dc_externalid": {
+            "value": null
+        },
+        "userAssignedIdentities_pyplan_aks_agentpool_externalid": {
+            "value": null
+        }
+    }
+}
