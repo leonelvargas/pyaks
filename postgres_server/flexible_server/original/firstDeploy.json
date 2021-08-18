@@ -1,0 +1,337 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "administratorLogin": {
+            "type": "string",
+            "defaultValue": "pyplan_db_user"
+        },
+        "administratorLoginPassword": {
+            "type": "securestring"
+        },
+        "serverName": {
+            "type": "string",
+            "defaultValue": "pyplanpg"
+        },
+        "virtualNetworkName": {
+            "type": "string",
+            "defaultValue": "azure-pyplan-aks-vnet"
+        },
+        "virtualNetworkAddressPrefix": {
+            "type": "string",
+            "defaultValue": "10.0.0.0/8"
+        },
+        "serverEdition": {
+            "type": "string",
+            "defaultValue": "GeneralPurpose"
+        },
+        "storageSizeMB": {
+            "type": "int",
+            "defaultValue": 131072
+        },
+        "haEnabled": {
+            "type": "string",
+            "defaultValue": "Disabled"
+        },
+        "availabilityZone": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "version": {
+            "type": "string",
+            "defaultValue": "12"
+        },
+        "firewallRules": {
+            "type": "object",
+            "defaultValue": {
+                "rules": []
+            }
+        },
+        "backupRetentionDays": {
+            "type": "int",
+            "defaultValue": 7
+        },
+        "geoRedundantBackup": {
+            "type": "string",
+            "defaultValue": "Disabled"
+        },
+        "vmName": {
+            "type": "string",
+            "defaultValue": "Standard_D2s_v3"
+        },
+        "clusterName": {
+            "type": "string",
+            "defaultValue": "pyplan-aks"
+        },
+        "publicNetworkAccess": {
+            "type": "string",
+            "defaultValue": "Disabled",
+            "metadata": {
+                "description": "Value should be either Enabled or Disabled"
+            }
+        },
+        "vnetData": {
+            "type": "object",
+            "metadata": {
+                "description": "Vnet data is an object which contains all parameters pertaining to vnet and subnet"
+            },
+            "defaultValue": {
+                "virtualNetworkName": "azure-pyplan-aks-vnet",
+                "virtualNetworkId": "/subscriptions/066f9ea0-74db-4751-921d-94dec804dc98/resourceGroups/azure-pyplan-aks/providers/Microsoft.Network/virtualNetworks/azure-pyplan-aks-vnet",
+                "subnetName": "pyplan",
+                "virtualNetworkSubscriptionName": "Pay-As-You-Go",
+                "virtualNetworkAddressPrefix": "10.0.0.0/8",
+                "virtualNetworkResourceGroupName": "azure-pyplan-aks",
+                "location": "westus2",
+                "subscriptionId": "066f9ea0-74db-4751-921d-94dec804dc98",
+                "subnetProperties": {
+                    "provisioningState": "Succeeded",
+                    "addressPrefix": "10.1.0.0/24",
+                    "serviceEndpoints": [],
+                    "delegations": [
+                        {
+                            "name": "Microsoft.DBforPostgreSQL.flexibleServers",
+                            "id": "/subscriptions/066f9ea0-74db-4751-921d-94dec804dc98/resourceGroups/azure-pyplan-aks/providers/Microsoft.Network/virtualNetworks/azure-pyplan-aks-vnet/subnets/pyplan/delegations/Microsoft.DBforPostgreSQL.flexibleServers",
+                            "etag": "W/\"b2c00a99-0e7a-4fb6-9001-eaebb156ed27\"",
+                            "properties": {
+                                "provisioningState": "Succeeded",
+                                "serviceName": "Microsoft.DBforPostgreSQL/flexibleServers",
+                                "actions": [
+                                    "Microsoft.Network/virtualNetworks/subnets/join/action"
+                                ]
+                            },
+                            "type": "Microsoft.Network/virtualNetworks/subnets/delegations"
+                        }
+                    ],
+                    "privateEndpointNetworkPolicies": "Enabled",
+                    "privateLinkServiceNetworkPolicies": "Enabled"
+                },
+                "subnetNeedsUpdate": false,
+                "isNewVnet": false,
+                "delegatedSubnetArguments": {
+                    "SubnetArmResourceId": "/subscriptions/066f9ea0-74db-4751-921d-94dec804dc98/resourceGroups/azure-pyplan-aks/providers/Microsoft.Network/virtualNetworks/azure-pyplan-aks-vnet/subnets/pyplan"
+                },
+                "usePrivateDnsZone": true,
+                "isNewPrivateDnsZone": true,
+                "privateDnsResourceGroup": "azure-pyplan-aks",
+                "privateDnsSubscriptionId": "066f9ea0-74db-4751-921d-94dec804dc98",
+                "privateDnsZoneName": "pyplanpg.private.postgres.database.azure.com",
+                "privateDnsZoneArguments": {
+                    "PrivateDnsZoneArmResourceId": "/subscriptions/066f9ea0-74db-4751-921d-94dec804dc98/resourceGroups/azure-pyplan-aks/providers/Microsoft.Network/privateDnsZones/pyplanpg.private.postgres.database.azure.com"
+                },
+                "linkVirtualNetwork": true,
+                "privateDnsZoneSubscription": "Pay-As-You-Go"
+            }
+        },
+        "agentPoolProfilesUpdate": {
+            "type": "array",
+            "metadata": {
+                "description": "Configuration of node pools"
+            },
+            "defaultValue": [{
+                "name": "pyplanpods",
+                "count": 1,
+                "vmSize": "Standard_DS3_v2",
+                "osDiskSizeGB": 30,
+                "type": "VirtualMachineScaleSets",
+                "nodeLabels": {
+                    "env":"Pyplan"
+                },
+                "mode": "User",
+                "osType": "Linux",
+                "maxPods": 110,
+                "enableAutoScaling": true,
+                "minCount": 1,
+                "maxCount": 5,
+                "vnetSubnetID": "/subscriptions/066f9ea0-74db-4751-921d-94dec804dc98/resourceGroups/azure-pyplan-aks/providers/Microsoft.Network/virtualNetworks/azure-pyplan-aks-vnet/subnets/default"
+            }]
+        }
+    },
+    "variables": {
+        "api": "2020-02-14-preview",
+        "firewallRules": "[parameters('firewallRules').rules]"
+    },
+    "resources": [
+        { 
+            "copy": {
+                "name": "agentpools",
+                "mode": "serial",
+                "batchSize":1,
+                "count": "[length(parameters('agentPoolProfilesUpdate'))]"
+            },
+            "apiVersion": "2021-02-01",
+            "type": "Microsoft.ContainerService/managedClusters/agentPools",
+            "name": "[concat(parameters('clusterName'),'/', parameters('agentPoolProfilesUpdate')[copyIndex('agentpools')].name)]",
+            "location": "[parameters('vnetData').location]",
+            "properties": "[parameters('agentPoolProfilesUpdate')[copyIndex('agentpools')]]"
+        },
+        {
+            "condition": "[and(parameters('vnetData').usePrivateDnsZone, parameters('vnetData').isNewPrivateDnsZone)]",
+            "type": "Microsoft.Resources/deployments",
+            "name": "privateDnsZone_DEPLOY_Pyplan38795Z",
+            "apiVersion": "2020-06-01",
+            "subscriptionId": "[parameters('vnetData').privateDnsSubscriptionId]",
+            "resourceGroup": "[parameters('vnetData').privateDnsResourceGroup]",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {},
+                    "variables": {},
+                    "resources": [
+                        {
+                            "type": "Microsoft.Network/privateDnsZones",
+                            "apiVersion": "2018-09-01",
+                            "name": "[parameters('vnetData').privateDnsZoneName]",
+                            "location": "global",
+                            "tags": {},
+                            "properties": {}
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "condition": "[or(parameters('vnetData').isNewVnet, parameters('vnetData').subnetNeedsUpdate)]",
+            "type": "Microsoft.Resources/deployments",
+            "name": "virtualNetwork_DEPLOY_Pyplan38795Z",
+            "apiVersion": "2020-06-01",
+            "resourceGroup": "[parameters('vnetData').virtualNetworkResourceGroupName]",
+            "subscriptionId": "[parameters('vnetData').subscriptionId]",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {},
+                    "variables": {},
+                    "resources": [
+                        {
+                            "condition": "[parameters('vnetData').subnetNeedsUpdate]",
+                            "type": "Microsoft.Network/virtualNetworks/subnets",
+                            "name": "[concat(parameters('vnetData').virtualNetworkName, '/', parameters('vnetData').subnetName)]",
+                            "apiVersion": "2020-05-01",
+                            "properties": "[parameters('vnetData').subnetProperties]"
+                        },
+                        {
+                            "condition": "[parameters('vnetData').isNewVnet]",
+                            "type": "Microsoft.Network/virtualNetworks",
+                            "name": "[parameters('vnetData').virtualNetworkName]",
+                            "apiVersion": "2020-05-01",
+                            "location": "[parameters('vnetData').location]",
+                            "tags": {},
+                            "properties": {
+                                "addressSpace": {
+                                    "addressPrefixes": [
+                                        "[parameters('vnetData').virtualNetworkAddressPrefix]"
+                                    ]
+                                },
+                                "subnets": [
+                                    {
+                                        "name": "[parameters('vnetData').subnetName]",
+                                        "properties": "[parameters('vnetData').subnetProperties]"
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "apiVersion": "2020-06-01",
+            "condition": "[and(parameters('vnetData').usePrivateDnsZone, parameters('vnetData').linkVirtualNetwork)]",
+            "name": "virtualNetworkLink_DEPLOY_Pyplan38795Z",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "privateDnsZone_DEPLOY_Pyplan38795Z",
+                "virtualNetwork_DEPLOY_Pyplan38795Z"
+            ],
+            "subscriptionId": "[parameters('vnetData').privateDnsSubscriptionId]",
+            "resourceGroup": "[parameters('vnetData').privateDnsResourceGroup]",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                        {
+                            "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+                            "apiVersion": "2020-06-01",
+                            "name": "[concat(parameters('vnetData').privateDnsZoneName, '/', uniqueString(parameters('vnetData').virtualNetworkId))]",
+                            "location": "global",
+                            "properties": {
+                                "virtualNetwork": {
+                                    "id": "[parameters('vnetData').virtualNetworkId]"
+                                },
+                                "registrationEnabled": false
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "apiVersion": "[variables('api')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "virtualNetworkLink_DEPLOY_Pyplan38795Z"
+            ],
+            "name": "[parameters('serverName')]",
+            "properties": {
+                "version": "[parameters('version')]",
+                "administratorLogin": "[parameters('administratorLogin')]",
+                "administratorLoginPassword": "[parameters('administratorLoginPassword')]",
+                "publicNetworkAccess": "[parameters('publicNetworkAccess')]",
+                "DelegatedSubnetArguments": "[if(empty(parameters('vnetData').delegatedSubnetArguments), json('null'), parameters('vnetData').delegatedSubnetArguments)]",
+                "PrivateDnsZoneArguments": "[if(empty(parameters('vnetData').privateDnsZoneArguments), json('null'), parameters('vnetData').privateDnsZoneArguments)]",
+                "haEnabled": "[parameters('haEnabled')]",
+                "storageProfile": {
+                    "storageMB": "[parameters('storageSizeMB')]",
+                    "backupRetentionDays": "[parameters('backupRetentionDays')]",
+                    "geoRedundantBackup": "[parameters('geoRedundantBackup')]"
+                },
+                "availabilityZone": "[parameters('availabilityZone')]"
+            },
+            "sku": {
+                "name": "[parameters('vmName')]",
+                "tier": "[parameters('serverEdition')]"
+            },
+            "tags": {},
+            "type": "Microsoft.DBforPostgreSQL/flexibleServers"
+        },
+        {
+            "condition": "[greater(length(variables('firewallRules')), 0)]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-08-01",
+            "name": "[concat('firewallRules-', copyIndex())]",
+            "copy": {
+                "count": "[if(greater(length(variables('firewallRules')), 0), length(variables('firewallRules')), 1)]",
+                "mode": "Serial",
+                "name": "firewallRulesIterator"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.DBforPostgreSQL/flexibleServers/', parameters('serverName'))]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                        {
+                            "type": "Microsoft.DBforPostgreSQL/flexibleServers/firewallRules",
+                            "name": "[concat(parameters('serverName'),'/',variables('firewallRules')[copyIndex()].name)]",
+                            "apiVersion": "[variables('api')]",
+                            "properties": {
+                                "StartIpAddress": "[variables('firewallRules')[copyIndex()].startIPAddress]",
+                                "EndIpAddress": "[variables('firewallRules')[copyIndex()].endIPAddress]"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}

@@ -55,51 +55,6 @@
         },
         "networkPolicy": {
             "value": "azure"
-        },
-        "serverName": {
-            "value": "pyplanpg"
-        },
-        "skuName": {
-            "value": "GP_Gen5_4"
-        },
-        "skuTier": {
-            "value": "GeneralPurpose"
-        },
-        "skuCapacity": {
-            "value": 4
-        },
-        "skuFamily": {
-            "value": "Gen5"
-        },
-        "skuSizeMB": {
-            "value": 102400
-        },
-        "backupRetentionDays": {
-            "value": 7
-        },
-        "geoRedundantBackup": {
-            "value": "Disabled"
-        },
-        "storageAutoGrow": {
-            "value": "Enabled"
-        },
-        "tags": {
-            "value": {}
-        },
-        "infrastructureEncryption": {
-            "value": "Disabled"
-        },
-        "administratorLogin": {
-            "value": "pyplan_db_user"
-        },
-        "administratorLoginPassword": {
-            "value": null
-        },
-        "previewFeature": {
-            "value": ""
-        },
-        "version": {
-            "value": "11"
         }
     }
 }
