@@ -20,6 +20,13 @@
                 "description": "The name of the cluster."
             }
         },
+        "virtualNetworkName": {
+            "type": "string",
+            "defaultValue": "azure-pyplan-aks-vnet",
+            "metadata": {
+                "description": "Name of the cluster Virtual Network."
+            }
+        },
         "virtualNetworkAddressPrefix": {
             "type": "string",
             "defaultValue": "10.0.0.0/8",
@@ -71,13 +78,6 @@
             ],
             "metadata": {
                 "description": "Value should be either true or false. If true is set, the template deploy the subnet for the Postgres server. The following parameters will be used in both situations."
-            }
-        },
-        "virtualNetworkName": {
-            "type": "string",
-            "defaultValue": "azure-pyplan-aks-vnet",
-            "metadata": {
-                "description": "Name of the cluster Virtual Network. This subnet must be in the current cluster virtual Network. If clusterNecessity is true use the default value."
             }
         },
         "virtualNetworkSubnetName": {
