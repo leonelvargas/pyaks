@@ -1,0 +1,303 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "clusterName": {
+            "type": "string",
+            "defaultValue": "pyplan-aks"
+        },
+        "virtualNetworkAddressPrefix": {
+            "type": "string",
+            "defaultValue": "10.0.0.0/8"
+        },
+        "aksVirtualNetworkSubnetAddressPrefix": {
+            "type": "string",
+            "defaultValue": "10.240.0.0/16"
+        },
+        "kubernetesVersion": {
+            "type": "string",
+            "defaultValue": "1.21.1",
+            "metadata": {
+                "description": "The version of Kubernetes."
+            }
+        },
+        "enableAzureMetricsDashboard": {
+            "type": "bool",
+            "defaultValue": true,
+            "metadata": {
+                "description": "Boolean flag to turn on and off omsagent addon."
+            }
+        },
+        "workspaceRegion": {
+            "type": "string",
+            "defaultValue": "westus2",
+            "metadata": {
+                "description": "Specify the region for your OMS workspace."
+            }
+        },
+        "omsSku": {
+            "type": "string",
+            "defaultValue": "standalone",
+            "allowedValues": [
+                "free",
+                "standalone",
+                "pernode"
+            ],
+            "metadata": {
+                "description": "Select the SKU for your workspace."
+            }
+        },
+        "serviceCidr": {
+            "type": "string",
+            "metadata": {
+                "description": "A CIDR notation IP range from which to assign service cluster IPs."
+            },
+            "defaultValue": "10.0.0.0/16"
+        },
+        "dnsServiceIP": {
+            "type": "string",
+            "metadata": {
+                "description": "Containers DNS server IP address."
+            },
+            "defaultValue": "10.0.0.10"
+        },
+        "dockerBridgeCidr": {
+            "type": "string",
+            "metadata": {
+                "description": "A CIDR notation IP for Docker bridge."
+            },
+            "defaultValue": "172.17.0.1/16"
+        }
+    },
+    "resources": [
+        {
+            "condition": "[parameters('enableAzureMetricsDashboard')]",
+            "name": "DefaultResourceGroup-WUS2",
+            "type": "Microsoft.Resources/resourceGroups",
+            "apiVersion": "2020-10-01",
+            "location": "[resourceGroup().location]",
+            "properties": {}
+        },
+        {
+            "apiVersion": "2021-02-01",
+            "dependsOn": [
+                "[concat('Microsoft.Resources/deployments/', 'WorkspaceDeployment-20210803152314')]",
+                "Microsoft.Network/virtualNetworks/azure-pyplan-aks-vnet"
+            ],
+            "type": "Microsoft.ContainerService/managedClusters",
+            "location": "[resourceGroup().location]",
+            "name": "[parameters('clusterName')]",
+            "properties": {
+                "kubernetesVersion": "[parameters('kubernetesVersion')]",
+                "enableRBAC": true,
+                "dnsPrefix": "[concat(parameters('clusterName'), '-dns')]",
+                "agentPoolProfiles": [
+                    {
+                        "name": "agentpool",
+                        "osDiskSizeGB": 30,
+                        "count": 1,
+                        "enableAutoScaling": true,
+                        "minCount": 1,
+                        "maxCount": 2,
+                        "vmSize": "Standard_D2s_v3",
+                        "osType": "Linux",
+                        "storageProfile": "ManagedDisks",
+                        "type": "VirtualMachineScaleSets",
+                        "mode": "System",
+                        "maxPods": 110,
+                        "availabilityZones": [],
+                        "vnetSubnetID": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/azure-pyplan-aks-vnet/subnets/default')]"
+                    }
+                ],
+                "networkProfile": {
+                    "loadBalancerSku": "standard",
+                    "networkPlugin": "azure",
+                    "networkPolicy": "azure",
+                    "serviceCidr": "[parameters('serviceCidr')]",
+                    "dnsServiceIP": "[parameters('dnsServiceIP')]",
+                    "dockerBridgeCidr": "[parameters('dockerBridgeCidr')]"
+                },
+                "apiServerAccessProfile": {
+                    "enablePrivateCluster": false
+                },
+                "addonProfiles": {
+                    "httpApplicationRouting": {
+                        "enabled": false
+                    },
+                    "azurepolicy": {
+                        "enabled": true
+                    },
+                    "omsAgent": {
+                        "enabled": "[parameters('enableAzureMetricsDashboard')]",
+                        "config": {
+                            "logAnalyticsWorkspaceResourceID": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/DefaultResourceGroup-WUS2/providers/Microsoft.OperationalInsights/workspaces/DefaultWorkspace-066f9ea0-74db-4751-921d-94dec804dc98-WUS2')]"
+                        }
+                    }
+                }
+            },
+            "tags": {},
+            "identity": {
+                "type": "SystemAssigned"
+            }
+        },
+        {
+            "condition": "[parameters('enableAzureMetricsDashboard')]",
+            "type": "Microsoft.Resources/deployments",
+            "name": "SolutionDeployment-20210803152314",
+            "apiVersion": "2017-05-10",
+            "resourceGroup": "DefaultResourceGroup-WUS2",
+            "subscriptionId": "[subscription().subscriptionId]",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {},
+                    "variables": {},
+                    "resources": [
+                        {
+                            "apiVersion": "2015-11-01-preview",
+                            "type": "Microsoft.OperationsManagement/solutions",
+                            "location": "[parameters('workspaceRegion')]",
+                            "name": "ContainerInsights(DefaultWorkspace-066f9ea0-74db-4751-921d-94dec804dc98-WUS2)",
+                            "properties": {
+                                "workspaceResourceId": "DefaultWorkspace-066f9ea0-74db-4751-921d-94dec804dc98-WUS2"
+                            },
+                            "plan": {
+                                "name": "ContainerInsights(DefaultWorkspace-066f9ea0-74db-4751-921d-94dec804dc98-WUS2)",
+                                "product": "[concat('OMSGallery/', 'ContainerInsights')]",
+                                "promotionCode": "",
+                                "publisher": "Microsoft"
+                            }
+                        }
+                    ]
+                }
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Resources/deployments/', 'WorkspaceDeployment-20210803152314')]"
+            ]
+        },
+        {
+            "condition": "[parameters('enableAzureMetricsDashboard')]",
+            "type": "Microsoft.Resources/deployments",
+            "name": "WorkspaceDeployment-20210803152314",
+            "apiVersion": "2017-05-10",
+            "resourceGroup": "DefaultResourceGroup-WUS2",
+            "subscriptionId": "[subscription().subscriptionId]",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {},
+                    "variables": {},
+                    "resources": [
+                        {
+                            "apiVersion": "2015-11-01-preview",
+                            "type": "Microsoft.OperationalInsights/workspaces",
+                            "location": "[parameters('workspaceRegion')]",
+                            "name": "DefaultWorkspace-066f9ea0-74db-4751-921d-94dec804dc98-WUS2",
+                            "properties": {
+                                "sku": {
+                                    "name": "[parameters('omsSku')]"
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "condition": "[parameters('enableAzureMetricsDashboard')]",
+            "type": "Microsoft.Resources/deployments",
+            "name": "ClusterMonitoringMetricPulisherRoleAssignmentDepl-20210803152314",
+            "apiVersion": "2017-05-10",
+            "subscriptionId": "[subscription().subscriptionId]",
+            "resourceGroup": "[resourceGroup().name]",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {},
+                    "variables": {},
+                    "resources": [
+                        {
+                            "type": "Microsoft.ContainerService/managedClusters/providers/roleAssignments",
+                            "apiVersion": "2018-01-01-preview",
+                            "name": "[concat(parameters('clusterName'), '/Microsoft.Authorization/d6f1d119-73e4-400c-92ef-d18df623c077')]",
+                            "properties": {
+                                "roleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', '3913510d-42f4-4e42-8a64-420c390055eb')]",
+                                "principalId": "[reference(parameters('clusterName')).addonProfiles.omsAgent.identity.objectId]",
+                                "scope": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.ContainerService/managedClusters/', parameters('clusterName'))]"
+                            }
+                        }
+                    ]
+                }
+            },
+            "dependsOn": [
+                "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.ContainerService/managedClusters/', parameters('clusterName'))]"
+            ]
+        },
+        {
+            "apiVersion": "2020-11-01",
+            "name": "azure-pyplan-aks-vnet",
+            "type": "Microsoft.Network/virtualNetworks",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "subnets": [
+                    {
+                        "name": "default",
+                        "id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/azure-pyplan-aks-vnet/subnets/default')]",
+                        "properties": {
+                            "addressPrefix": "[parameters('aksVirtualNetworkSubnetAddressPrefix')]"
+                        }
+                    }
+                ],
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[parameters('virtualNetworkAddressPrefix')]"
+                    ]
+                }
+            },
+            "tags": {}
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "name": "ClusterSubnetRoleAssignmentDeployment-20210803152314",
+            "apiVersion": "2017-05-10",
+            "subscriptionId": "[subscription().subscriptionId]",
+            "resourceGroup": "[resourceGroup().name]",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {},
+                    "variables": {},
+                    "resources": [
+                        {
+                            "type": "Microsoft.Network/virtualNetworks/subnets/providers/roleAssignments",
+                            "apiVersion": "2018-09-01-preview",
+                            "name": "azure-pyplan-aks-vnet/default/Microsoft.Authorization/4ba9e2b2-296d-4354-846d-e74fefd870c9",
+                            "properties": {
+                                "roleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', '4d97b98b-1d4f-4787-a291-c67834d212e7')]",
+                                "principalId": "[reference(parameters('clusterName'),'2021-02-01','Full').identity.principalId]",
+                                "scope": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/azure-pyplan-aks-vnet/subnets/default')]"
+                            }
+                        }
+                    ]
+                }
+            },
+            "dependsOn": [
+                "Microsoft.Network/virtualNetworks/azure-pyplan-aks-vnet"
+            ]
+        }
+    ],
+    "outputs": {
+        "controlPlaneFQDN": {
+            "type": "string",
+            "value": "[reference(concat('Microsoft.ContainerService/managedClusters/', parameters('clusterName'))).fqdn]"
+        }
+    }
+}
