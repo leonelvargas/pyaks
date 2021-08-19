@@ -17,7 +17,7 @@
             "type": "string",
             "defaultValue": "pyplan-aks",
             "metadata": {
-                "description": "The name of the cluster."
+                "description": "The name of the cluster. If you already installed a cluster, please set its name."
             }
         },
         "virtualNetworkName": {
@@ -31,7 +31,7 @@
             "type": "string",
             "defaultValue": "10.0.0.0/8",
             "metadata": {
-                "description": "A CIDR notation IP range for cluster Virtual Network. If you already installed a cluster, the CIDR notation must be equal to its virtual network of the cluster"
+                "description": "A CIDR notation IP range for cluster Virtual Network. If you already installed a cluster, please set the CIDR notation of its virtual network"
             }
         },
         "aksVirtualNetworkSubnetAddressPrefix": {
@@ -84,7 +84,7 @@
             "type": "string",
             "defaultValue": "pyplanpg",
             "metadata": {
-                "description": "Name of the subnet for Postgresql. If you already deployed a subnet for pyplan postgres server, you need remember these subnets must be in the current cluster virtual Network in order to communicate with pyplan pods."
+                "description": "Name of the subnet for Postgresql. If you already deployed a subnet for pyplan postgres server, you need remember that these subnets must be in the current cluster virtual Network in order to communicate with pyplan pods."
             }
         },
         "virtualNetworkSubnetAddressPrefix": {
@@ -125,21 +125,21 @@
             "type": "int",
             "defaultValue": 131072,
             "metadata": {
-                "description": "Server size in Mb."
+                "description": "Postgres server size in Mb."
             }
         },
         "haEnabled": {
             "type": "string",
             "defaultValue": "Disabled",
             "metadata": {
-                "description": "Enable/Disable High Availability of the server."
+                "description": "Enable/Disable High Availability of the Postgres server."
             }
         },
         "availabilityZone": {
             "type": "string",
             "defaultValue": "",
             "metadata": {
-                "description": "HA ZONES."
+                "description": "HA zones in Postgres server."
             }
         },
         "version": {
@@ -160,7 +160,7 @@
             "type": "string",
             "defaultValue": "Disabled",
             "metadata": {
-                "description": "Enable/Disable geoRedundantBackup of the server."
+                "description": "Enable/Disable geoRedundantBackup of the Postgres server."
             }
         },
         "vmName": {
@@ -203,14 +203,14 @@
             "type": "string",
             "defaultValue": "pyplan",
             "metadata": {
-                "description": "Subnet name for the Pyplan nodepool. This subnet must be in the current cluster virtual Network. If agentpoolSubnetNecessity is false, complete the current parameter with already subnet deployed."
+                "description": "Subnet name for the Pyplan nodepool. This subnet must be in the current cluster virtual Network. If agentpoolSubnetNecessity is false, complete the current parameter with your subnet data"
             }
         },
         "agentpoolVirtualNetworkSubnetAddressPrefix": {
             "type": "string",
             "defaultValue": "10.230.0.0/16",
             "metadata": {
-                "description": "A CIDR notation IP range for Pyplan nodepool. This subnet must be in the current cluster virtual Network. If agentpoolSubnetNecessity is false, complete the current parameter with already subnet deployed."
+                "description": "A CIDR notation IP range for Pyplan nodepool. This subnet must be in the current cluster virtual Network. If agentpoolSubnetNecessity is false, complete the current parameter with your subnet data."
             }
         },
         "agentpoolMinCountNodes": {
