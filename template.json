@@ -36,7 +36,7 @@
         },
         "aksVirtualNetworkSubnetAddressPrefix": {
             "type": "string",
-            "defaultValue": "11.240.0.0/16",
+            "defaultValue": "10.240.0.0/16",
             "metadata": {
                 "description": "A CIDR notation IP range for default subnet of the cluster, the system pods will be deployed there. If you already installed a cluster, you could skip this step."
             }
@@ -50,14 +50,14 @@
         },
         "serviceCidr": {
             "type": "string",
-            "defaultValue": "11.0.0.0/16",
+            "defaultValue": "10.0.0.0/16",
             "metadata": {
                 "description": "A CIDR notation IP range from which to assign service cluster IPs. If you already installed a cluster, you could skip this step."
             }
         },
         "dnsServiceIP": {
             "type": "string",
-            "defaultValue": "11.0.0.10",
+            "defaultValue": "10.0.0.10",
             "metadata": {
                 "description": "Containers DNS server IP address. If you already installed a cluster, you could skip this step."
             }
@@ -89,7 +89,7 @@
         },
         "virtualNetworkSubnetAddressPrefix": {
             "type": "string",
-            "defaultValue": "11.1.0.0/22",
+            "defaultValue": "10.1.0.0/22",
             "metadata": {
                 "description": "A CIDR notation IP range of the subnet for Postgres server."
             }
@@ -208,7 +208,7 @@
         },
         "agentpoolVirtualNetworkSubnetAddressPrefix": {
             "type": "string",
-            "defaultValue": "11.230.0.0/16",
+            "defaultValue": "10.230.0.0/16",
             "metadata": {
                 "description": "A CIDR notation IP range for Pyplan nodepool. This subnet must be in the current cluster virtual Network. If agentpoolSubnetNecessity is false, complete the current parameter with your subnet data."
             }
