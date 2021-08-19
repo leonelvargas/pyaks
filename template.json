@@ -24,49 +24,49 @@
             "type": "string",
             "defaultValue": "azure-pyplan-aks-vnet",
             "metadata": {
-                "description": "Name of the cluster Virtual Network."
+                "description": "Name of the cluster Virtual Network. If you already installed a cluster, please set its virtual network name."
             }
         },
         "virtualNetworkAddressPrefix": {
             "type": "string",
             "defaultValue": "10.0.0.0/8",
             "metadata": {
-                "description": "A CIDR notation IP range for cluster Virtual Network."
+                "description": "A CIDR notation IP range for cluster Virtual Network. If you already installed a cluster, the CIDR notation must be equal to its virtual network of the cluster"
             }
         },
         "aksVirtualNetworkSubnetAddressPrefix": {
             "type": "string",
             "defaultValue": "10.240.0.0/16",
             "metadata": {
-                "description": "A CIDR notation IP range for default subnet of the cluster. The system pods will be deployed there."
+                "description": "A CIDR notation IP range for default subnet of the cluster, the system pods will be deployed there. If you already installed a cluster, you could skip this step."
             }
         },
         "kubernetesVersion": {
             "type": "string",
             "defaultValue": "1.21.1",
             "metadata": {
-                "description": "Kubernetes version."
+                "description": "Kubernetes version. If you already installed a cluster, you could skip this step."
             }
         },
         "serviceCidr": {
             "type": "string",
             "defaultValue": "10.0.0.0/16",
             "metadata": {
-                "description": "A CIDR notation IP range from which to assign service cluster IPs."
+                "description": "A CIDR notation IP range from which to assign service cluster IPs. If you already installed a cluster, you could skip this step."
             }
         },
         "dnsServiceIP": {
             "type": "string",
             "defaultValue": "10.0.0.10",
             "metadata": {
-                "description": "Containers DNS server IP address."
+                "description": "Containers DNS server IP address. If you already installed a cluster, you could skip this step."
             }
         },
         "dockerBridgeCidr": {
             "type": "string",
             "defaultValue": "172.17.0.1/16",
             "metadata": {
-                "description": "A CIDR notation IP for Docker bridge."
+                "description": "A CIDR notation IP for Docker bridge. If you already installed a cluster, you could skip this step."
             }
         },
         "serverSubnetNecessity": {
@@ -77,21 +77,21 @@
                 false
             ],
             "metadata": {
-                "description": "Value should be either true or false. If true is set, the template deploy the subnet for the Postgres server. The following parameters will be used in both situations."
+                "description": "Value should be either true or false. If true is set, the template deploy the subnet for the Postgres server. Otherwise, false is set you must fill ´virtualNetworkSubnetName´ and ´virtualNetworkSubnetAddressPrefix´ with yor subnet data."
             }
         },
         "virtualNetworkSubnetName": {
             "type": "string",
             "defaultValue": "pyplanpg",
             "metadata": {
-                "description": "Name of the subnet for Postgresql. This subnet must be in the current cluster virtual Network."
+                "description": "Name of the subnet for Postgresql. If you already deployed a subnet for pyplan postgres server, you need remember these subnets must be in the current cluster virtual Network in order to communicate with pyplan pods."
             }
         },
         "virtualNetworkSubnetAddressPrefix": {
             "type": "string",
             "defaultValue": "10.1.0.0/22",
             "metadata": {
-                "description": "A CIDR notation IP range for Postgres server. This subnet must be in the current cluster virtual Network."
+                "description": "A CIDR notation IP range of the subnet for Postgres server."
             }
         },
         "administratorLogin": {
@@ -170,6 +170,17 @@
                 "description": "Vm size for Postgres server."
             }
         },
+        "agentpoolSubnetNecessity": {
+            "type": "bool",
+            "defaultValue": true,
+            "allowedValues": [
+                true,
+                false
+            ],
+            "metadata": {
+                "description": "Value should be either true or false. If true is set, the template deploy the subnet for the Pyplan nodepool. Otherwise, false is set you must fill ´agentpoolSubnetName´ and ´agentpoolVirtualNetworkSubnetAddressPrefix´ with yor subnet data."
+            }
+        },
         "agentpoolNecessity": {
             "type": "bool",
             "defaultValue": true,
@@ -179,17 +190,6 @@
             ],
             "metadata": {
                 "description": "Value should be either true or false. If true is set, the template deploy a Pyplan nodepool"
-            }
-        },
-        "agentpoolSubnetNecessity": {
-            "type": "bool",
-            "defaultValue": true,
-            "allowedValues": [
-                true,
-                false
-            ],
-            "metadata": {
-                "description": "Value should be either true or false. If true is set, the template deploy the subnet for the Pyplan nodepool"
             }
         },
         "agentpoolName": {
