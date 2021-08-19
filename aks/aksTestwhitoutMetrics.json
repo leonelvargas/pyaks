@@ -2,9 +2,27 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
+        "clusterNecessity": {
+            "type": "bool",
+            "defaultValue": true,
+            "allowedValues": [
+                true,
+                false
+            ],
+            "metadata": {
+                "description": "Value should be either true or false. If true is set, the template deploy a Pyplan-AKS cluster."
+            }
+        },
         "clusterName": {
             "type": "string",
             "defaultValue": "pyplan-aks"
+        },
+        "virtualNetworkName": {
+            "type": "string",
+            "defaultValue": "azure-pyplan-aks-vnet",
+            "metadata": {
+                "description": "Name of the cluster Virtual Network."
+            }
         },
         "virtualNetworkAddressPrefix": {
             "type": "string",
@@ -45,9 +63,10 @@
     },
     "resources": [
         {
+            "condition": "[parameters('clusterNecessity')]",
             "apiVersion": "2021-02-01",
             "dependsOn": [
-                "Microsoft.Network/virtualNetworks/azure-pyplan-aks-vnet"
+                "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]"
             ],
             "type": "Microsoft.ContainerService/managedClusters",
             "location": "[resourceGroup().location]",
@@ -71,7 +90,7 @@
                         "mode": "System",
                         "maxPods": 110,
                         "availabilityZones": [],
-                        "vnetSubnetID": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/azure-pyplan-aks-vnet/subnets/default')]"
+                        "vnetSubnetID": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'), '/subnets/default')]"
                     }
                 ],
                 "networkProfile": {
@@ -103,15 +122,16 @@
             }
         },
         {
+            "condition": "[parameters('clusterNecessity')]",
             "apiVersion": "2020-11-01",
-            "name": "azure-pyplan-aks-vnet",
+            "name": "[parameters('virtualNetworkName')]",
             "type": "Microsoft.Network/virtualNetworks",
             "location": "[resourceGroup().location]",
             "properties": {
                 "subnets": [
                     {
                         "name": "default",
-                        "id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/azure-pyplan-aks-vnet/subnets/default')]",
+                        "id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'), '/subnets/default')]",
                         "properties": {
                             "addressPrefix": "[parameters('aksVirtualNetworkSubnetAddressPrefix')]"
                         }
@@ -126,6 +146,7 @@
             "tags": {}
         },
         {
+            "condition": "[parameters('clusterNecessity')]",
             "type": "Microsoft.Resources/deployments",
             "name": "ClusterSubnetRoleAssignmentDeployment-20210803152314",
             "apiVersion": "2017-05-10",
@@ -142,18 +163,18 @@
                         {
                             "type": "Microsoft.Network/virtualNetworks/subnets/providers/roleAssignments",
                             "apiVersion": "2018-09-01-preview",
-                            "name": "azure-pyplan-aks-vnet/default/Microsoft.Authorization/4ba9e2b2-296d-4354-846d-e74fefd870c9",
+                            "name": "[concat(parameters('virtualNetworkName'), '/default/Microsoft.Authorization/', guid(resourceGroup().id, parameters('virtualNetworkName')))]",
                             "properties": {
                                 "roleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', '4d97b98b-1d4f-4787-a291-c67834d212e7')]",
                                 "principalId": "[reference(parameters('clusterName'),'2021-02-01','Full').identity.principalId]",
-                                "scope": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/azure-pyplan-aks-vnet/subnets/default')]"
+                                "scope": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'), '/subnets/default')]"
                             }
                         }
                     ]
                 }
             },
             "dependsOn": [
-                "Microsoft.Network/virtualNetworks/azure-pyplan-aks-vnet"
+                "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]"
             ]
         }
     ],

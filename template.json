@@ -104,7 +104,7 @@
         "administratorLoginPassword": {
             "type": "securestring",
             "metadata": {
-                "description": "Database Password."
+                "description": "Passwords must be at least 8 characters and at most 128 characters, and contain characters from three of the following categories - English uppercase letters, English lowercase letters, numbers (0-9), and non-alphanumeric characters (!, $, #, %, etc.)."
             }
         },
         "serverName": {
@@ -340,7 +340,7 @@
                         {
                             "type": "Microsoft.Network/virtualNetworks/subnets/providers/roleAssignments",
                             "apiVersion": "2018-09-01-preview",
-                            "name": "[concat(parameters('virtualNetworkName'), '/default/Microsoft.Authorization/4ba9e2b2-296d-4354-846d-e74fefd870c9')]",
+                            "name": "[concat(parameters('virtualNetworkName'), '/default/Microsoft.Authorization/', guid(resourceGroup().id, parameters('virtualNetworkName')))]",
                             "properties": {
                                 "roleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', '4d97b98b-1d4f-4787-a291-c67834d212e7')]",
                                 "principalId": "[reference(parameters('clusterName'),'2021-02-01','Full').identity.principalId]",
@@ -461,7 +461,7 @@
                                     {
                                         "name": "Microsoft.DBforPostgreSQL.flexibleServers",
                                         "id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'), '/subnets/', parameters('virtualNetworkSubnetName'), '/delegations/Microsoft.DBforPostgreSQL.flexibleServers')]",
-                                        "etag": "W/\"b2c00a99-0e7a-4fb6-9001-eaebb156ed27\"",
+                                        "etag": "[uniqueString('b2c00a99-0e7a-4fb6-9001-eaebb156ed27')]",
                                         "properties": {
                                             "provisioningState": "Succeeded",
                                             "serviceName": "Microsoft.DBforPostgreSQL/flexibleServers",
