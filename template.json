@@ -29,7 +29,7 @@
         },
         "virtualNetworkAddressPrefix": {
             "type": "string",
-            "defaultValue": "11.0.0.0/8",
+            "defaultValue": "10.0.0.0/8",
             "metadata": {
                 "description": "A CIDR notation IP range for cluster Virtual Network. If you already installed a cluster, please set the CIDR notation of its virtual network"
             }
