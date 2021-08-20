@@ -103,6 +103,8 @@
         },
         "administratorLoginPassword": {
             "type": "securestring",
+            "minLength": 8,
+            "maxLength": 128,
             "metadata": {
                 "description": "Passwords must be at least 8 characters and at most 128 characters, and contain characters from three of the following categories - English uppercase letters, English lowercase letters, numbers (0-9), and non-alphanumeric characters (!, $, #, %, etc.)."
             }
