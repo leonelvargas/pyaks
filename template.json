@@ -10,7 +10,7 @@
                 false
             ],
             "metadata": {
-                "description": "Value should be either true or false. If true is set, the template deploy a Pyplan-AKS cluster."
+                "description": "Value should be either true or false. If true is set, the template will deploy a Pyplan-AKS cluster."
             }
         },
         "clusterName": {
